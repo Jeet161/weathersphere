@@ -10,14 +10,20 @@ import { AirQualityCard } from '@/components/weather/AirQualityCard';
 import { FavoritesPanel } from '@/components/weather/FavoritesPanel';
 import { useAuthStore } from '@/store/auth.store';
 import { useWeatherStore } from '@/store/weather.store';
+import { useSettingsStore } from '@/store/settings.store';
 import { City, Favorite, RecentSearch } from '@/types';
 import api from '@/lib/api';
 
 export default function DashboardPage() {
   const router = useRouter();
   const { isAuthenticated, _hasHydrated } = useAuthStore();
-  const { currentWeather, forecast, airQuality, units, isLoading, error, fetchWeatherForCity } =
+  const { currentWeather, forecast, airQuality, units, setUnits, isLoading, error, fetchWeatherForCity } =
     useWeatherStore();
+  const { settings, fetchSettings } = useSettingsStore();
+
+  // Derive units from settings
+  const apiUnits = settings?.tempUnit === 'fahrenheit' ? 'imperial' : 'metric';
+  const windUnit = (settings?.windUnit as 'kmh' | 'mph' | 'ms') ?? 'kmh';
 
   const [favorites, setFavorites] = useState<Favorite[]>([]);
   const [recentSearches, setRecentSearches] = useState<RecentSearch[]>([]);
@@ -28,12 +34,21 @@ export default function DashboardPage() {
     if (!isAuthenticated) router.replace('/auth/login');
   }, [_hasHydrated, isAuthenticated, router]);
 
-  // Load favorites + recents
+  // Load favorites + recents + settings
   useEffect(() => {
     if (!isAuthenticated) return;
     api.get('/favorites').then(({ data }) => setFavorites(data.data)).catch(() => {});
     api.get('/recent-searches').then(({ data }) => setRecentSearches(data.data)).catch(() => {});
+    fetchSettings();
   }, [isAuthenticated]);
+
+  // Sync weather units when settings change
+  useEffect(() => {
+    if (settings) {
+      const newUnits = settings.tempUnit === 'fahrenheit' ? 'imperial' : 'metric';
+      setUnits(newUnits);
+    }
+  }, [settings?.tempUnit]);
 
   // Geolocation on first load
   useEffect(() => {
@@ -121,7 +136,8 @@ export default function DashboardPage() {
             <div className="lg:col-span-2 space-y-4">
               <CurrentWeatherCard
                 weather={currentWeather}
-                units={units}
+                units={apiUnits}
+                windUnit={windUnit}
                 isFavorite={isFavorite}
                 onToggleFavorite={handleToggleFavorite}
               />

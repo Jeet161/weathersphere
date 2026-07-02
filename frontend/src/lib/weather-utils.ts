@@ -16,11 +16,14 @@ export function formatTemp(temp: number, unit: 'metric' | 'imperial' = 'metric')
   return `${rounded}°${unit === 'metric' ? 'C' : 'F'}`;
 }
 
-export function formatWindSpeed(speed: number, unit: 'metric' | 'imperial' = 'metric') {
-  // OWM returns m/s for metric, mph for imperial
-  if (unit === 'imperial') return `${Math.round(speed)} mph`;
-  const kmh = Math.round(speed * 3.6);
-  return `${kmh} km/h`;
+export function formatWindSpeed(speed: number, apiUnit: 'metric' | 'imperial' = 'metric', windUnit: 'kmh' | 'mph' | 'ms' = 'kmh') {
+  // OWM returns m/s for metric, mph for imperial — normalize to m/s first
+  const ms = apiUnit === 'imperial' ? speed * 0.44704 : speed;
+  switch (windUnit) {
+    case 'mph': return `${Math.round(ms * 2.237)} mph`;
+    case 'ms': return `${ms.toFixed(1)} m/s`;
+    default: return `${Math.round(ms * 3.6)} km/h`;
+  }
 }
 
 export function formatTime(unixTs: number, timezone = 0) {

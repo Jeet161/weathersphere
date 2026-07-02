@@ -14,6 +14,7 @@ import {
 interface CurrentWeatherCardProps {
   weather: CurrentWeather;
   units: 'metric' | 'imperial';
+  windUnit?: 'kmh' | 'mph' | 'ms';
   isFavorite: boolean;
   onToggleFavorite: () => void;
 }
@@ -21,6 +22,7 @@ interface CurrentWeatherCardProps {
 export function CurrentWeatherCard({
   weather,
   units,
+  windUnit = 'kmh',
   isFavorite,
   onToggleFavorite,
 }: CurrentWeatherCardProps) {
@@ -73,7 +75,7 @@ export function CurrentWeatherCard({
       {/* Stats grid */}
       <div className="grid grid-cols-2 gap-3">
         <Stat icon={<Wind className="w-4 h-4" />} label="Wind">
-          {formatWindSpeed(weather.windSpeed, units)} {windDirection(weather.windDeg)}
+          {formatWindSpeed(weather.windSpeed, units, windUnit)} {windDirection(weather.windDeg)}
         </Stat>
         <Stat icon={<Droplets className="w-4 h-4" />} label="Humidity">
           {weather.humidity}%
