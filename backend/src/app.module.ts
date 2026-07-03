@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import configuration from './config/configuration';
+import { AppController } from './app.controller';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { WeatherModule } from './modules/weather/weather.module';
@@ -22,5 +23,6 @@ import { SettingsModule } from './modules/settings/settings.module';
     RecentSearchesModule,
     SettingsModule,
   ],
+  controllers: [AppController],
 })
 export class AppModule {}
